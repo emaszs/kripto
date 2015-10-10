@@ -33,6 +33,8 @@ public class Test {
 	
 	public final static int[][] I = makeIdentityMatrix(12);
 	
+	public final static int[][] G = getHMatrix();
+	
 	public static int[][] makeIdentityMatrix(int n) {
 		int[][] identity = new int[n][n];
 		for (int i = 0; i < n; i++) {
@@ -84,6 +86,15 @@ public class Test {
 		}
 		
 		return h;
+	}
+	
+	public static int[][] getHMatrix() {
+		int[][] res = new int[24][12];
+		for (int i = 0; i < 12; i++) {
+			res[i] = I[i];
+			res[i+12] = B12[i];
+		}
+		return res;
 	}
 	
 	public static int[][] vectorStringToArray(String v) {
@@ -152,6 +163,12 @@ public class Test {
 		System.out.println(Arrays.toString(encodedArray[0]));
 		System.out.println(Arrays.toString(completeVectorBasedOnWeight(encodedArray[0])));
 		
+		String encodedVector = "101111101111010010010010";
+		encodedArray = vectorStringToArray(encodedVector);
+		
+		int[][] syndrome = multiplyMatrices(encodedArray, G);
+		
+		System.out.println("Syndrome: " + Arrays.toString(syndrome[0]));
 	}
 }
 
