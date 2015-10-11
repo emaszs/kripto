@@ -105,7 +105,7 @@ public class Test {
 		return result;
 	}
 	
-	public static int getVectorWeight(int[] v) {
+	public static int calculateVectorWeight(int[] v) {
 		int weight = 0;
 		for (int i = 0; i < v.length; i++) {
 			if (v[i] == 1) {
@@ -121,13 +121,55 @@ public class Test {
 			newVector[i] = v[i];
 		}
 		
-		if (getVectorWeight(v) % 2 == 0) {
+		if (calculateVectorWeight(v) % 2 == 0) {
 			newVector[23] = 1;
 		} else {
 			newVector[23] = 0;
 		}
 		
 		return newVector;
+	}
+	
+	public static int[] calculateErrorVector(int[][] v) {
+		int[] errorVector = new int[24];
+		int[] syndrome = new int[12];
+		syndrome = multiplyMatrices(v, G)[0];		
+		int weight = calculateVectorWeight(syndrome);
+		if (weight <= 3) {
+			// u=[s, 0]
+			for (int i = 0; i < 24; i++) {
+				errorVector[i] = syndrome[i];
+				errorVector[i+12] = 0;
+			}
+			return errorVector;
+		} else {
+			int[] testVector = new int[12];
+			for (int i = 0; i < 12; i++) {
+				testVector = sumVectors(syndrome, B12[i]);
+				if (calculateVectorWeight(testVector) <= 2) {
+					System.out.println("found s + bi vector with i=" + i + Arrays.toString(testVector));
+					for (int j = 0; j < 12; j++) {
+						errorVector[j] = testVector[j];
+						errorVector[j+12] = 0;
+					}
+					errorVector[12 + i] = 1;
+					return errorVector;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static int[] sumVectors(int [] v1, int[] v2) {
+		if (v1.length == v2.length) {
+			int[] result = new int[v1.length];
+			for (int i = 0; i < v1.length; i++) {
+				result[i] = (v1[i] + v2[i]) % 2;
+			}
+			return result;
+		} else {
+			return null;
+		}
 	}
 
 	public static void main(String[] args) {
@@ -169,6 +211,15 @@ public class Test {
 		int[][] syndrome = multiplyMatrices(encodedArray, G);
 		
 		System.out.println("Syndrome: " + Arrays.toString(syndrome[0]));
+		String v1 = "110001001001";
+		String b1 = "110111000101";
+		System.out.println(Arrays.toString(sumVectors(vectorStringToArray(v1)[0], vectorStringToArray(b1)[0])));
+		
+		String anotherVectorToDecode = "001001001101101000101000";
+		int[][] anotherArray = vectorStringToArray(anotherVectorToDecode);
+		int[] u = new int[24];
+		u = calculateErrorVector(anotherArray);
+		System.out.println(Arrays.toString(u));
 	}
 }
 
