@@ -130,14 +130,27 @@ public class Test {
 		return newVector;
 	}
 	
-	public static int[] calculateErrorVector(int[][] v) {
+	public static int[] decodeC23(int[] vectorToDecode) {
+		int[] wi = completeVectorBasedOnWeight(vectorToDecode);
+		int[] u = calculateErrorVector(wi);
+		if (u != null) {
+			int[] res = sumVectors(u, wi);
+			return Arrays.copyOfRange(res, 0, 12);
+		} else {
+			return null;
+		}
+	}
+	
+	public static int[] calculateErrorVector(int[] v) {
 		int[] errorVector = new int[24];
 		int[] syndrome = new int[12];
-		syndrome = multiplyMatrices(v, G)[0];		
+		int[][] temp2dVector = new int[1][12];
+		temp2dVector[0] = v; 
+		syndrome = multiplyMatrices(temp2dVector, G)[0];		
 		int weight = calculateVectorWeight(syndrome);
 		if (weight <= 3) {
 			// u=[s, 0]
-			for (int i = 0; i < 24; i++) {
+			for (int i = 0; i < 12; i++) {
 				errorVector[i] = syndrome[i];
 				errorVector[i+12] = 0;
 			}
@@ -164,7 +177,7 @@ public class Test {
 		weight = calculateVectorWeight(secondSyndrome);
 		if (weight <= 3) {
 			//u=[0, sB]
-			for (int i = 0; i < 24; i++) {
+			for (int i = 0; i < 12; i++) {
 				errorVector[i] = 0;
 				errorVector[i+12] = secondSyndrome[i];
 			}
@@ -211,13 +224,16 @@ public class Test {
 //		I.print(0, 0);
 // 		getHMatrix().print(0, 0);
 		// #TODO CHECK LENGTH
-		String enteredVector = "100010001101";
+		String enteredVector = "010010001101";
 		System.out.println(Arrays.toString(vectorStringToArray(enteredVector)));
 		int[][] enteredArray = vectorStringToArray(enteredVector);
 		//print2dArray(multiplyMatrices(vectorStringToArray(enteredVector), G23));
-		int[][] encodedArray = multiplyMatrices(vectorStringToArray(enteredVector), G23);
+		int[][] encodedArray = multiplyMatrices(enteredArray, G23);
 		System.out.println(Arrays.toString(encodedArray[0]));
 		System.out.println(Arrays.toString(completeVectorBasedOnWeight(encodedArray[0])));
+		System.out.println("Decoded array:" + Arrays.toString(decodeC23(encodedArray[0])));
+		System.out.println("Entered array:" + Arrays.toString(enteredArray[0]));
+		assert Arrays.equals(enteredArray[0], decodeC23(encodedArray[0]));
 		
 		String encodedVector = "101111101111010010010010";
 		encodedArray = vectorStringToArray(encodedVector);
@@ -232,8 +248,16 @@ public class Test {
 		String anotherVectorToDecode = "001001001101101000101000";
 		int[][] anotherArray = vectorStringToArray(anotherVectorToDecode);
 		int[] u = new int[24];
-		u = calculateErrorVector(anotherArray);
+		u = calculateErrorVector(anotherArray[0]);
 		System.out.println(Arrays.toString(u));
+		assert Arrays.toString(u).equals("[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]");
+		
+		String vector364 = "000111000111011011010000";
+		int[][] arr = vectorStringToArray(vector364);
+		int[] u2 = new int[24];
+		u2 = calculateErrorVector(arr[0]);
+		System.out.println(Arrays.toString(u2));
+		assert Arrays.toString(u2).equals("[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0]");
 	}
 }
 
