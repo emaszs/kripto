@@ -157,6 +157,34 @@ public class Test {
 				}
 			}
 		}
+		
+		int[][] firstSyndrome = new int[1][12];
+		firstSyndrome[0] = syndrome;
+		int[] secondSyndrome = multiplyMatrices(firstSyndrome, B12)[0];
+		weight = calculateVectorWeight(secondSyndrome);
+		if (weight <= 3) {
+			//u=[0, sB]
+			for (int i = 0; i < 24; i++) {
+				errorVector[i] = 0;
+				errorVector[i+12] = secondSyndrome[i];
+			}
+			return errorVector;
+		} else {
+			int[] testVector = new int[12];
+			for (int i = 0; i < 12; i++) {
+				testVector = sumVectors(secondSyndrome, B12[i]);
+				if (calculateVectorWeight(testVector) <= 2) {
+					System.out.println("found sB + bi vector with i=" + i + Arrays.toString(testVector));
+					for (int j = 0; j < 12; j++) {
+						errorVector[j] = 0;
+						errorVector[j+12] = testVector[j];
+					}
+					errorVector[i] = 1;
+					return errorVector;
+				}
+			}
+		}
+		
 		return null;
 	}
 	
@@ -172,21 +200,7 @@ public class Test {
 		}
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		int[][] array = 
-				{{1, 2, 3},
-				 {3, 2, 1},
-				 {1, 1, 1}};
-		int[][] array2 = 
-				{{1, 2, 0, 2},
-				 {3, 2, 1, 2},
-				 {1, 1, 1, 2}};
-//		
-//		Matrix a = new Matrix(array);
-//		Matrix b = new Matrix(array2);
-		
-		print2dArray(multiplyMatrices(array, array2));
+	public static void main(String[] args) {	
 		print2dArray(getG23Matrix());
 		int[][] G23 = new int[12][23];
 		G23 = getG23Matrix();
