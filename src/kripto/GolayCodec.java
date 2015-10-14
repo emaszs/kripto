@@ -193,7 +193,7 @@ public class GolayCodec {
 			for (int i = 0; i < 12; i++) {
 				testVector = sumVectors(secondSyndrome, B12[i]);
 				if (calculateVectorWeight(testVector) <= 2) {
-					System.out.println("found sB + bi vector with i=" + i + Arrays.toString(testVector));
+//					System.out.println("found sB + bi vector with i=" + i + Arrays.toString(testVector));
 					for (int j = 0; j < 12; j++) {
 						errorVector[j] = 0;
 						errorVector[j+12] = testVector[j];
