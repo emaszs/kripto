@@ -97,10 +97,10 @@ public class GolayCodec {
 		return res;
 	}
 	
-	public int[][] vectorStringToArray(String v) {
-		int[][] result = new int[1][v.length()];
+	public int[] vectorStringToArray(String v) {
+		int[] result = new int[v.length()];
 		for (int i = 0; i < v.length(); i++) {
-			result[0][i] = Integer.parseInt(String.valueOf(v.charAt(i)));
+			result[i] = Integer.parseInt(String.valueOf(v.charAt(i)));
 		}
 		return result;
 	}
@@ -128,6 +128,12 @@ public class GolayCodec {
 		}
 		
 		return newVector;
+	}
+	
+	public int[] encodeC23(int[] vectorToEncode) {
+		int[][] modifiedVector = new int[1][24];
+		modifiedVector[0] = vectorToEncode;
+		return this.multiplyMatrices(modifiedVector, this.getG23Matrix())[0];
 	}
 	
 	public int[] decodeC23(int[] vectorToDecode) {
@@ -160,7 +166,7 @@ public class GolayCodec {
 			for (int i = 0; i < 12; i++) {
 				testVector = sumVectors(syndrome, B12[i]);
 				if (calculateVectorWeight(testVector) <= 2) {
-					System.out.println("found s + bi vector with i=" + i + Arrays.toString(testVector));
+//					System.out.println("found s + bi vector with i=" + i + Arrays.toString(testVector));
 					for (int j = 0; j < 12; j++) {
 						errorVector[j] = testVector[j];
 						errorVector[j+12] = 0;
