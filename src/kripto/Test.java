@@ -20,7 +20,7 @@ public class Test {
 		System.out.println(Arrays.toString(UI.vectorStringToArray(enteredVector)));
 		int[] enteredArray = UI.vectorStringToArray(enteredVector);
 		int[] encodedArray = codec.encodeC23(enteredArray);
-		System.out.println(Arrays.toString(encodedArray));
+		System.out.println("Encoded: " + Arrays.toString(encodedArray));
 		System.out.println(Arrays.toString(codec.completeVectorBasedOnWeight(encodedArray)));
 		System.out.println("Decoded array:" + Arrays.toString(codec.decodeC23(encodedArray)));
 		System.out.println("Entered array:" + Arrays.toString(enteredArray));
@@ -45,6 +45,7 @@ public class Test {
 		assert Arrays.toString(u2).equals("[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0]");
 		
 		Channel ch = new Channel();
+		ch.setErrorProbability(0.1);
 		ch.sendCodeword(codec.encodeC23(arr));
 		System.out.println("Sent codeword: " + Arrays.toString(ch.sentCodeword));
 		ch.receiveCodeword();

@@ -2,6 +2,13 @@ package kripto;
 
 import java.util.Arrays;
 
+
+/**
+ * 
+ * @author Emilis
+ * Klasė atsakinga už vektoriaus užkodavimą ir dekodavimą.
+ *
+ */
 public class GolayCodec {
 	public final int[][] B12 = 
 		{{1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1},
@@ -35,6 +42,13 @@ public class GolayCodec {
 	
 	public final int[][] G = getHMatrix();
 	
+	
+	/**
+	 * Metodas sukuria tapatybės matricą NxN dydžio.
+	 * 
+	 * Parametras n - tapatybės matricos dydis sveiko skaičiaus formatu
+	 * Grąžina dvimatį masyvą su tapatybės matrica
+	 */
 	public int[][] makeIdentityMatrix(int n) {
 		int[][] identity = new int[n][n];
 		for (int i = 0; i < n; i++) {
@@ -46,6 +60,11 @@ public class GolayCodec {
 		return identity;
 	}
 	
+	/**
+	 * Metodas skirtas spausdinti dvimačius masyvus
+	 * 
+	 * Parametras arr - dvimatis sveikų skaičių masyvas
+	 */
 	public void print2dArray(int[][] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			for (int j = 0; j < arr[0].length; j++) {
@@ -55,6 +74,15 @@ public class GolayCodec {
 		}
 	}
 
+	
+	/**
+	 * Iteratyviai daugina dvi sveikų skaičių matricas, pateiktas per parametrus.
+	 * 
+	 * Parametras m1 - dvimatis sveikų skaičių (NxM) pirmos matricos masyvas
+	 * Parametras m2 - dvimatis sveikų skaičių (MxP) antros matricos masyvas
+	 * 
+	 * Grąžina matricų daugybos rezultatą, taip pat sveikų skaičių dvimatį masyvą (NxP)
+	 */
 	public int[][] multiplyMatrices(int[][] m1, int[][] m2) {
 		int[][] res = new int[m1.length][m2[0].length];
 		for (int i = 0; i < m1.length; i++) {
@@ -69,16 +97,23 @@ public class GolayCodec {
 		return res;
 	}
 	
-	
+	/**
+	 * Sukuria generuojančią G matricą, naudojamą vektoriaus užkodavimui Golėjaus kodu.
+	 * Tam padaryti sujungiamos matricų I ir B11 eilutės
+	 * 
+	 * Grąžina dvimatį sveikų skaičių G matricos masyvą (12x23)
+	 */
 	public int[][] getG23Matrix() {
 		int[][] h = new int[12][23];
 		for (int i = 0; i < 12; i++) {
 			int[] rowB = B11[i];
 			int[] rowI = I[i];
 			int[] newArr = new int[23];
+			// Pirmą pusę kiekvienos eilutės užpildome tapatybės matrica
 			for (int j = 0; j < 12; j++) {
 				newArr[j] = rowI[j];
 			}
+			// Antrąją pusę užpildome matrica B
 			for (int j = 0; j < 11; j++) {
 				newArr[j+12] = rowB[j];
 			}
@@ -88,6 +123,11 @@ public class GolayCodec {
 		return h;
 	}
 	
+	/**
+	 * Sukuria Golėjaus kodo kontrolinę matricą H
+	 * 
+	 * Grąžina dvimatį sveikų skaičių kontrolinės matricos masyvą (24x12)
+	 */
 	public int[][] getHMatrix() {
 		int[][] res = new int[24][12];
 		for (int i = 0; i < 12; i++) {
@@ -97,6 +137,14 @@ public class GolayCodec {
 		return res;
 	}
 	
+	/** 
+	 * Konvertuoja eilutės tipo vektorių į sveikų skaičių masyvą, kadangi juos lengviau apdoroti.
+	 * Programoje naudojami tik dvinariai vektoriai, taigi greičiausiai ši eilutė bus sudaryta iš 0 ir 1.
+	 * 
+	 * Parametras v - eilutės tipo vektorius.
+	 * 
+	 * Grąžina sveikų skaičių masyvą, atitinkantį duotą vektorių
+	 */
 	public int[] vectorStringToArray(String v) {
 		int[] result = new int[v.length()];
 		for (int i = 0; i < v.length(); i++) {
@@ -105,6 +153,13 @@ public class GolayCodec {
 		return result;
 	}
 	
+	/**
+	 * Apskaičiuoja vektoriaus svorį - skaičių bitų, kurie yra lugūs 1.
+	 * 
+	 * Parametras v - sveikų skaičių masyvas 
+	 * 
+	 * Grąžina sveiką skaičių, kuris yra parametro v svoris
+	 */
 	public int calculateVectorWeight(int[] v) {
 		int weight = 0;
 		for (int i = 0; i < v.length; i++) {
@@ -115,6 +170,16 @@ public class GolayCodec {
 		return weight;
 	}
 	
+	/**
+	 * Metodas naudojamas C23 dekodavimo algoritme. 
+	 * Vektorių, kurio ilgis yra 23, metodas papildo vienu bitu, tam kad padaryti vektoriaus svorį nelyginį.
+	 * Jei svoris lyginis, vektorius papildomas vienetu.
+	 * Jei ne, vektorius papildomas 0.
+	 * 
+	 * Parametras v - 23 ilgio vektorius, atvaizduotas sveikų skaičių masyve.
+	 * 
+	 * Grąžina ilgio 24 sveikų skaičių masyvą, kurio svoris nelyginis. 
+	 */
 	public int[] completeVectorBasedOnWeight(int[] v) {
 		int[] newVector = new int[24];
 		for (int i = 0; i < v.length; i++) {
@@ -130,12 +195,30 @@ public class GolayCodec {
 		return newVector;
 	}
 	
+	/**
+	 * Užkoduoja ilgio 12 vektorių Golėjaus kodu.
+	 * Tai daroma sudauginant pateiktą vektorių su generuojančia matrica G.
+	 * 
+	 * Parametras vectorToEncode - sveikų skaičių masyvo vektorius, kuris bus užkoduotas
+	 * 
+	 * Grąžina sveikų skaičių ilgio 23 masyvą, kas yra užkoduotas Golėjaus kodu vektorius.
+	 */
 	public int[] encodeC23(int[] vectorToEncode) {
-		int[][] modifiedVector = new int[1][24];
+		int[][] modifiedVector = new int[1][];
 		modifiedVector[0] = vectorToEncode;
 		return this.multiplyMatrices(modifiedVector, this.getG23Matrix())[0];
 	}
 	
+	/**
+	 * Dekoduoja Golėjaus kodu užkoduotą vektorių.
+	 * Didžioji dalis darbo atliekama kito metodo, calculateErrorVector.
+	 * Turint klaidų vektorių, pakanka jį susumuoti su dekoduojamu vektoriu ir grąžinti pirmus 12 bitų.
+	 * Tai ir bus dekoduotas rezultatas.
+	 * 
+	 * Parametras vectorToDecode - vectorius, kuris bus dekoduotas
+	 *  
+	 * Grąžina dekoduotą ilgio 12 vektorių, arba null, jei nepavyko rasti teisingo klaidų vektoriaus.
+	 */
 	public int[] decodeC23(int[] vectorToDecode) {
 		int[] wi = completeVectorBasedOnWeight(vectorToDecode);
 		int[] u = calculateErrorVector(wi);

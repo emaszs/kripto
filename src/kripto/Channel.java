@@ -11,16 +11,19 @@ public class Channel {
 	
 	public int[] receivedCodeword;
 	
+	public List<Integer> errorPositions;
+	
+	public Random random = new Random(System.currentTimeMillis());
+	
 	public void sendCodeword(int[] c) {
 		this.sentCodeword = c;
 	}
-	
-	public List<Integer> errorPositions = new ArrayList<Integer>();
-	
+
 	public void receiveCodeword() {
+		errorPositions = new ArrayList<Integer>();
 		int[] result = new int[sentCodeword.length];
 		for (int i = 0; i < sentCodeword.length; i++) {
-			if (new Random().nextDouble() < errorProbability) {
+			if (random.nextDouble() < errorProbability) {
 				result[i] = (sentCodeword[i] + 1) % 2;
 				errorPositions.add(i+1);
 			} else {

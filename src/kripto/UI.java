@@ -50,7 +50,7 @@ public class UI {
 		System.out.println("Norint uzdaryti programa iveskite zodi \"quit\" ir spauskite Enter.");
 		
 		while (exit == false) {
-			System.out.println("Iveskite binarini (0 arba 1) vektoriu, kurio ilgis 12 ir spauskite Enter. "
+			System.out.println("Iveskite dvinari (0 arba 1) vektoriu, kurio ilgis 12 ir spauskite Enter. "
 					+ "\nVektorius gali tureti tarpus.");
 			String enteredData = scan.nextLine().trim().replaceAll("\\s", "");
 			
@@ -98,10 +98,20 @@ public class UI {
 						} else if (enteredVectorIsCorrect(enteredData, 23)) {
 							System.out.println("Nustatytas naujas kodas. Dekoduotas vektorius:");
 							channel.setReceivedCodeword(vectorStringToArray(enteredData));
-							printArray(codec.decodeC23(channel.getReceivedCodeword()));
+							int[] decodedWord = codec.decodeC23(channel.getReceivedCodeword());
+							if (decodedWord != null) {
+								printArray(decodedWord);
+							} else {
+								System.out.println("Vektorius negalejo buti dekoduotas.");
+							}
 						} else {
 							System.out.println("Naudojamas is kanalo gautas kodas. Dekoduotas vektorius:");
-							printArray(codec.decodeC23(channel.getReceivedCodeword()));
+							int[] decodedWord = codec.decodeC23(channel.getReceivedCodeword());
+							if (decodedWord != null) {
+								printArray(decodedWord);
+							} else {
+								System.out.println("Vektorius negalejo buti dekoduotas.");
+							}
 						}
 					}
 				} else {
