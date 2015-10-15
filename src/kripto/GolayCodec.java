@@ -37,65 +37,12 @@ public class GolayCodec {
 	     {0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1},
 	     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 	
-	public final int[][] I = makeIdentityMatrix(12);
+	public final int[][] I = MatrixOperations.makeIdentityMatrix(12);
 	
 	public final int[][] G = getHMatrix();
 	
 	
-	/**
-	 * Metodas sukuria tapatybės matricą NxN dydžio.
-	 * 
-	 * Parametras n - tapatybės matricos dydis sveiko skaičiaus formatu
-	 * Grąžina dvimatį masyvą su tapatybės matrica
-	 */
-	public int[][] makeIdentityMatrix(int n) {
-		int[][] identity = new int[n][n];
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				identity[i][j] = 0;
-			}
-			identity[i][i] = 1;
-		}
-		return identity;
-	}
 	
-	/**
-	 * Metodas skirtas spausdinti dvimačius masyvus
-	 * 
-	 * Parametras arr - dvimatis sveikų skaičių masyvas
-	 */
-	public void print2dArray(int[][] arr) {
-		for (int i = 0; i < arr.length; i++) {
-			for (int j = 0; j < arr[0].length; j++) {
-				System.out.print(arr[i][j] + " ");
-			}
-			System.out.println();
-		}
-	}
-
-	
-	/**
-	 * Iteratyviai daugina dvi sveikų skaičių matricas, pateiktas per parametrus.
-	 * 
-	 * Parametras m1 - dvimatis sveikų skaičių (NxM) pirmos matricos masyvas
-	 * Parametras m2 - dvimatis sveikų skaičių (MxP) antros matricos masyvas
-	 * 
-	 * Grąžina matricų daugybos rezultatą, sveikų skaičių dvimatį masyvą (NxP)
-	 */
-	public int[][] multiplyMatrices(int[][] m1, int[][] m2) {
-		int[][] res = new int[m1.length][m2[0].length];
-		for (int i = 0; i < m1.length; i++) {
-			for (int j = 0; j < m2[0].length; j++) {
-				int sum = 0;
-				for (int k = 0; k < m2.length; k++) {
-					sum += m1[i][k] * m2[k][j];
-				}
-				// q = 2, todėl reikia skaičiuoti liekanas dalinant iš 2.
-				res[i][j] = sum % 2;
-			}
-		}
-		return res;
-	}
 	
 	/**
 	 * Sukuria generuojančią G matricą, naudojamą vektoriaus užkodavimui Golėjaus kodu.
@@ -192,7 +139,7 @@ public class GolayCodec {
 	public int[] encodeC23(int[] vectorToEncode) {
 		int[][] modifiedVector = new int[1][];
 		modifiedVector[0] = vectorToEncode;
-		return this.multiplyMatrices(modifiedVector, this.getG23Matrix())[0];
+		return MatrixOperations.multiplyMatrices(modifiedVector, this.getG23Matrix())[0];
 	}
 	
 	/**
@@ -234,7 +181,7 @@ public class GolayCodec {
 		temp2dVector[0] = v;
 		
 		// apskaičiuojamas sindromas dauginant dekoduojamą vektorių su generuojančia matrica G.
-		syndrome = multiplyMatrices(temp2dVector, G)[0];
+		syndrome = MatrixOperations.multiplyMatrices(temp2dVector, G)[0];
 		
 		int weight = calculateVectorWeight(syndrome);
 		if (weight <= 3) {
@@ -271,7 +218,7 @@ public class GolayCodec {
 		// apskaičiuojamas naujas sindromas sB - senasis sindromas dauginamas iš matricos B.
 		int[][] firstSyndrome = new int[1][12];
 		firstSyndrome[0] = syndrome;
-		int[] secondSyndrome = multiplyMatrices(firstSyndrome, B12)[0];
+		int[] secondSyndrome = MatrixOperations.multiplyMatrices(firstSyndrome, B12)[0];
 		weight = calculateVectorWeight(secondSyndrome);
 		if (weight <= 3) {
 			// šiuo atveju vektoriaus u apskaičiavimas paprastas - u = [0, sB + bi].

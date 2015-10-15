@@ -7,7 +7,7 @@ public class Test {
 	public static void main(String[] args) {
 		GolayCodec codec = new GolayCodec();
 		
-		codec.print2dArray(codec.getG23Matrix());
+//		codec.print2dArray(codec.getG23Matrix());
 //		int[][] G23 = codec.getG23Matrix();
 		
 //		a.times(b).print(0, 0);
