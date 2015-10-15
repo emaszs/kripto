@@ -2,8 +2,21 @@ package kripto;
 
 import java.util.Scanner;
 
+/**
+ * Klasė atsakingą už tekstinę vartotojo sąsają
+ * @author Emilis Antanas Rupeika
+ *
+ */
 public class UI {
 	
+	/** 
+	 * Konvertuoja eilutės tipo vektorių į sveikų skaičių masyvą, kadangi juos lengviau apdoroti.
+	 * Programoje naudojami tik dvinariai vektoriai, taigi ši eilutė bus sudaryta iš 0 ir 1.
+	 * 
+	 * Parametras v - eilutės tipo vektorius.
+	 * 
+	 * Grąžina sveikų skaičių masyvą, atitinkantį duotą vektorių
+	 */
 	public static int[] vectorStringToArray(String v) {
 		int[] result = new int[v.length()];
 		for (int i = 0; i < v.length(); i++) {
@@ -12,6 +25,11 @@ public class UI {
 		return result;
 	}
 	
+	/**
+	 * Į konsolę spausdina sveikų skaičių masyvą su tarpu tarp 12 ir 13 elementų.
+	 * 
+	 * Parametras arr - sveikų skaičių masyvas, kuris bus išspausdintas
+	 */
 	public static void printArray(int[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			System.out.print(arr[i]);
@@ -22,6 +40,13 @@ public class UI {
 		System.out.println();
 	}
 	
+	/**
+	 * Vartotojo įvesto vektoriaus tikrinimas pagal elementų kiekį ir tipą.
+	 * Parametras v - eilutės tipo vektorius
+	 * Parametras length - ilgis, kurio turėtų būti vektorius v.
+	 * 
+	 * Grąžina loginę reikšmę. true, jei vektorius korektiškas, false priešingai.
+	 */
 	public static boolean enteredVectorIsCorrect(String v, int length) {
 		if (v.length() != length) {
 			return false;
@@ -40,6 +65,12 @@ public class UI {
 		return true;
 	}
 	
+	/**
+	 * Tekstinės vartotojo sąsajos logika.
+	 * Leidžia įvesti ilgio 12 vektorių, jį užkoduoja (bei parodo), 
+	 * siunčia kanalu (parodo gautą), parodo kur ir keik įvyko klaidų, dekoduoja ir parodo rezultatą - ilgio 12 vektorių.
+	 * Taip pat leidžia keisti iš kanalo gautą ilgio 24 vektorių testavimo sumetimams.
+	 */
 	public static void initUI() {
 		GolayCodec codec = new GolayCodec();
 		Channel channel = new Channel();
@@ -52,12 +83,18 @@ public class UI {
 		while (exit == false) {
 			System.out.println("Iveskite dvinari (0 arba 1) vektoriu, kurio ilgis 12 ir spauskite Enter. "
 					+ "\nVektorius gali tureti tarpus.");
+			
+			// nuskaitomi ir išvalomi įvesti duomenys (panaikinami tarpai, nereikalingi \n simboliai)
 			String enteredData = scan.nextLine().trim().replaceAll("\\s", "");
 			
 			if (enteredData.toLowerCase().equals("quit")) {
 				exit = true;
 			} else {
 				if (enteredVectorIsCorrect(enteredData, 12)) {
+					
+					/*
+					 * tikimybės padaryti klaidą kanalu nuskaitymas ir tikrinimas
+					 */
 					boolean probabilityEntered = false;
 						System.out.println("Iveskite klaidos siunciant kanalu tikimybe tarp 0 ir 1 (pvz 0.12):");
 					while (probabilityEntered == false && exit == false) {
@@ -79,6 +116,9 @@ public class UI {
  					}
 					
 					if (exit == false) {
+						/*
+						 * Užkodavimas, parodymas ir nusiuntimas
+						 */
 						int[] codeword = codec.encodeC23(codec.encodeC23(vectorStringToArray(enteredData)));
 						System.out.println("Gautas kodas is ivesto vektoriaus:");
 						printArray(codeword);
@@ -91,6 +131,10 @@ public class UI {
 						printArray(receivedCodeword);
 						System.out.println("Siunciant is viso ivyko " + channel.errorPositions.size() + " klaidos. Klaidu pozicijos (1-23):");
 						System.out.println(channel.errorPositions.toString());
+						
+						/*
+						 * Iš kanalo gauto vektoriaus keitimas
+						 */
 						System.out.println("Jei norite pakeisti gauta vektoriu, iveskite ji. Jei ne, spauskite Enter.");
 						enteredData = scan.nextLine().trim().replaceAll("\\s", "");
 						if (enteredData.toLowerCase().equals("quit")) {
@@ -124,8 +168,10 @@ public class UI {
 		System.out.println("Uzdaroma...");
 	}
 	
+	/**
+	 * Programos įeities taškas.
+	 */
 	public static void main(String[] args) {
 		initUI();
-		
 	}
 }

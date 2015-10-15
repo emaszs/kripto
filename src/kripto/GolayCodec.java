@@ -2,10 +2,9 @@ package kripto;
 
 import java.util.Arrays;
 
-
 /**
  * 
- * @author Emilis
+ * @author Emilis Antanas Rupeika
  * Klasė atsakinga už vektoriaus užkodavimą ir dekodavimą.
  *
  */
@@ -81,7 +80,7 @@ public class GolayCodec {
 	 * Parametras m1 - dvimatis sveikų skaičių (NxM) pirmos matricos masyvas
 	 * Parametras m2 - dvimatis sveikų skaičių (MxP) antros matricos masyvas
 	 * 
-	 * Grąžina matricų daugybos rezultatą, taip pat sveikų skaičių dvimatį masyvą (NxP)
+	 * Grąžina matricų daugybos rezultatą, sveikų skaičių dvimatį masyvą (NxP)
 	 */
 	public int[][] multiplyMatrices(int[][] m1, int[][] m2) {
 		int[][] res = new int[m1.length][m2[0].length];
@@ -91,6 +90,7 @@ public class GolayCodec {
 				for (int k = 0; k < m2.length; k++) {
 					sum += m1[i][k] * m2[k][j];
 				}
+				// q = 2, todėl reikia skaičiuoti liekanas dalinant iš 2.
 				res[i][j] = sum % 2;
 			}
 		}
@@ -137,21 +137,7 @@ public class GolayCodec {
 		return res;
 	}
 	
-	/** 
-	 * Konvertuoja eilutės tipo vektorių į sveikų skaičių masyvą, kadangi juos lengviau apdoroti.
-	 * Programoje naudojami tik dvinariai vektoriai, taigi greičiausiai ši eilutė bus sudaryta iš 0 ir 1.
-	 * 
-	 * Parametras v - eilutės tipo vektorius.
-	 * 
-	 * Grąžina sveikų skaičių masyvą, atitinkantį duotą vektorių
-	 */
-	public int[] vectorStringToArray(String v) {
-		int[] result = new int[v.length()];
-		for (int i = 0; i < v.length(); i++) {
-			result[i] = Integer.parseInt(String.valueOf(v.charAt(i)));
-		}
-		return result;
-	}
+
 	
 	/**
 	 * Apskaičiuoja vektoriaus svorį - skaičių bitų, kurie yra lugūs 1.
@@ -222,6 +208,7 @@ public class GolayCodec {
 	public int[] decodeC23(int[] vectorToDecode) {
 		int[] wi = completeVectorBasedOnWeight(vectorToDecode);
 		int[] u = calculateErrorVector(wi);
+		// u gali įgyti null reikšmę, todėl tą reikia patikrinti.
 		if (u != null) {
 			int[] res = sumVectors(u, wi);
 			return Arrays.copyOfRange(res, 0, 12);
@@ -230,66 +217,100 @@ public class GolayCodec {
 		}
 	}
 	
+	/**
+	 * Apskaičiuoja klaidų vektorių u.
+	 * Jis naudojamas mėginant ištaisyti klaidas, esančias iš kanalo gautame kode.
+	 * 
+	 * Parametras v - dekoduojamas ilgio 24 vektorius sveikų skaičių masyve
+	 * 
+	 * Grąžina vektorių u - ilgio 24 sveikų skaičių masyvą.
+	 */
 	public int[] calculateErrorVector(int[] v) {
 		int[] errorVector = new int[24];
 		int[] syndrome = new int[12];
+		
+		// vektorius v pakeičiamas į dvimatį masyvą tam, kad jį būtų galima sudauginti su kita matrica
 		int[][] temp2dVector = new int[1][12];
-		temp2dVector[0] = v; 
-		syndrome = multiplyMatrices(temp2dVector, G)[0];		
+		temp2dVector[0] = v;
+		
+		// apskaičiuojamas sindromas dauginant dekoduojamą vektorių su generuojančia matrica G.
+		syndrome = multiplyMatrices(temp2dVector, G)[0];
+		
 		int weight = calculateVectorWeight(syndrome);
 		if (weight <= 3) {
-			// u=[s, 0]
+			// šiuo atveju vektoriaus u apskaičiavimas paprastas - u = [s, 0]
+			// tai yra 12-os bitų sindromas kartu su 12-a bitų lygių 0.
 			for (int i = 0; i < 12; i++) {
 				errorVector[i] = syndrome[i];
 				errorVector[i+12] = 0;
 			}
+			// vektorius apskaičiuotas, galima užbaigti darbą
 			return errorVector;
 		} else {
+			// jei nepavyko u gauti pirmu būdu, mėginama rasti tokį vektorių, kurio
+			// svoris(sindromas + bi) <= 2.
 			int[] testVector = new int[12];
 			for (int i = 0; i < 12; i++) {
 				testVector = sumVectors(syndrome, B12[i]);
 				if (calculateVectorWeight(testVector) <= 2) {
-//					System.out.println("found s + bi vector with i=" + i + Arrays.toString(testVector));
+					// suradus tokį vektorių, u = [s + bi, ei]
+					// tai yra 12-os bitų ilgio vektorius s + bi 
+					// kartu su 11-a nulių ir vienu vienetu, esančiu i-ojoje pozicijoje
 					for (int j = 0; j < 12; j++) {
 						errorVector[j] = testVector[j];
 						errorVector[j+12] = 0;
 					}
 					errorVector[12 + i] = 1;
+					// darbas baigiamas
 					return errorVector;
 				}
 			}
 		}
 		
+		// jei pirmame etape nepavyko rasti klaidų vektoriaus, pereinama į antrąjį.
+		// apskaičiuojamas naujas sindromas sB - senasis sindromas dauginamas iš matricos B.
 		int[][] firstSyndrome = new int[1][12];
 		firstSyndrome[0] = syndrome;
 		int[] secondSyndrome = multiplyMatrices(firstSyndrome, B12)[0];
 		weight = calculateVectorWeight(secondSyndrome);
 		if (weight <= 3) {
-			//u=[0, sB]
+			// šiuo atveju vektoriaus u apskaičiavimas paprastas - u = [0, sB + bi].
 			for (int i = 0; i < 12; i++) {
 				errorVector[i] = 0;
 				errorVector[i+12] = secondSyndrome[i];
 			}
+			// darbas baigiamas
 			return errorVector;
 		} else {
+			// priešingu atveju, mėginamas rasti toks vektorius sB + bi, kad
+			// svoris(sB + bi) <= 2.
 			int[] testVector = new int[12];
 			for (int i = 0; i < 12; i++) {
 				testVector = sumVectors(secondSyndrome, B12[i]);
 				if (calculateVectorWeight(testVector) <= 2) {
-//					System.out.println("found sB + bi vector with i=" + i + Arrays.toString(testVector));
+					// jį suradus, u = [ei, sB + bi].
 					for (int j = 0; j < 12; j++) {
 						errorVector[j] = 0;
 						errorVector[j+12] = testVector[j];
 					}
 					errorVector[i] = 1;
+					// darbas baigiamas
 					return errorVector;
 				}
 			}
 		}
-		
+		// jei abu etapai nepavyko, vektoriaus apskaičiavimas neįmanomas, todėl grąžinama null reikšmė.
 		return null;
 	}
 	
+	/**
+	 * Susumuoja du vienodo ilgio vektorius, q = 2. 
+	 * Sumuojamas kiekvienas elementas, grąžinamas rezultatas yra tokio pačio ilgio vektorius
+	 * 
+	 * Parametrai v1 ir v2 - vektoriai, kurie bus sumuojami
+	 * 
+	 * Grąžina susumuotą vektorių, sudarytą iš 0 ir 1.
+	 */
 	public int[] sumVectors(int [] v1, int[] v2) {
 		if (v1.length == v2.length) {
 			int[] result = new int[v1.length];
